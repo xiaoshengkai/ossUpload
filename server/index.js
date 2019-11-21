@@ -7,10 +7,7 @@ const { Nuxt, Builder } = require('nuxt')
 const app = new Koa()
 
 app.use(koaBody({
-  multipart: true,
-  formidable: {
-    maxFileSize: 200*1024*1024*100	// 设置上传文件大小最大限制，默认2M
-  }
+  multipart: true
 }))
 
 // Import and Set Nuxt.js options
@@ -21,10 +18,7 @@ async function start () {
   // Instantiate nuxt.js
   const nuxt = new Nuxt(config)
 
-  const {
-    host = process.env.HOST || '127.0.0.1',
-    port = process.env.PORT || 3000
-  } = nuxt.options.server
+  const { host, port } = config
 
   // Build in development
   if (config.dev) {
@@ -35,8 +29,32 @@ async function start () {
   }
 
   app.use(route.post('/upload', async (etx) => {
-      console.log(etx.request.files)
-      etx.body = {a: etx.file}
+
+      const oss = require('ali-oss');
+
+      const client = oss({
+        accessKeyId: 'LTAIBathEzzg276g',
+        accessKeySecret: '4oQrHuURu2RCHTuKw51FSvX1GHywBZ',
+        bucket: 'mpv-blog',
+        region: 'oss-cn-beijing'
+      });
+
+      // 查看拥有 bucket信息
+      // let result = await client.listBuckets();
+      // console.log(result)
+
+      try {
+        let result = await client.put(etx.request.files.file.name, etx.request.files.file.path);
+        etx.body = {
+          type: 1,
+          name: result.name,
+          url: result.url
+        }
+      } catch (e) {
+        etx.body = {
+          type: 0
+        }
+      }
   }))
 
   app.use((ctx) => {

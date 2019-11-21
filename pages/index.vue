@@ -5,6 +5,7 @@
             ref="upload"
             action=""
             :before-upload="beforeUpload"
+            :show-file-list="false"
             auto-upload
             multiple>
             <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
@@ -28,8 +29,14 @@ export default {
     },
     methods: {
         async beforeUpload (file) {
-            const res = await this.$requestFormPsot('/upload', file)
-            console.log(res)
+            try {
+              const { data } = await this.$requestFormPsot('/upload', file)
+              if (data.type) {
+                this.fileList.push(data.url)
+              }
+            } catch (e) {
+              this.$message.error('网络异常');
+            }
             return false
         }
     }
@@ -56,5 +63,7 @@ export default {
 }
 .showImgs {
     margin: 20px 0;
+    background-color: #f2f2f2;
+    padding: 20px;
 }
 </style>
