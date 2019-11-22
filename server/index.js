@@ -3,7 +3,6 @@ const route = require('koa-route')
 const koaBody = require('koa-body');
 const consola = require('consola')
 const { Nuxt, Builder } = require('nuxt')
-const { createConfig } = require('../plugins/createConfig')
 
 const app = new Koa()
 
@@ -20,7 +19,6 @@ async function start () {
   const nuxt = new Nuxt(config)
 
   const { host, port } = config
-  createConfig(host, port)
 
 
   // Build in development
