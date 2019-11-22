@@ -1,13 +1,12 @@
 import Vue from 'vue'
 import axios from 'axios'
-const config = require('../nuxt.config.js')
-const { host, port } = config
+import config from '../config.js'
 
 const util = {
     install(Vue) {
         Vue.prototype.$requestFormPsot = async (url, file) => {
           let instance = axios.create({
-            baseURL: `http://${host}:${port}`,
+            baseURL: `http://${config.host}:${config.port}`,
             headers: {
                 'Content-Type': 'multipart/form-data'
             }

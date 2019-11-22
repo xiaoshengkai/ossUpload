@@ -3,6 +3,7 @@ const route = require('koa-route')
 const koaBody = require('koa-body');
 const consola = require('consola')
 const { Nuxt, Builder } = require('nuxt')
+const { createConfig } = require('../plugins/createConfig')
 
 const app = new Koa()
 
@@ -19,6 +20,8 @@ async function start () {
   const nuxt = new Nuxt(config)
 
   const { host, port } = config
+  createConfig(host, port)
+
 
   // Build in development
   if (config.dev) {
@@ -37,7 +40,7 @@ async function start () {
         accessKeySecret: '4oQrHuURu2RCHTuKw51FSvX1GHywBZ',
         bucket: 'mpv-blog',
         region: 'oss-cn-beijing'
-      });
+      }); 
 
       // 查看拥有 bucket信息
       // let result = await client.listBuckets();
