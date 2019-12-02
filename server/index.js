@@ -38,7 +38,7 @@ async function start () {
         accessKeySecret: '4oQrHuURu2RCHTuKw51FSvX1GHywBZ',
         bucket: 'mpv-blog',
         region: 'oss-cn-beijing'
-      }); 
+      });
 
       // 查看拥有 bucket信息
       // let result = await client.listBuckets();

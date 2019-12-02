@@ -21,6 +21,8 @@
 </template>
 
 <script>
+import { Loading } from 'element-ui';
+
 export default {
     data() {
         return {
@@ -29,6 +31,12 @@ export default {
     },
     methods: {
         async beforeUpload (file) {
+            const loading = this.$loading({
+              lock: true,
+              text: 'Loading',
+              spinner: 'el-icon-loading',
+              background: 'rgba(0, 0, 0, 0.7)'
+            });
             try {
               const { data } = await this.$requestFormPsot('/upload', file)
               if (data.type) {
@@ -37,6 +45,7 @@ export default {
             } catch (e) {
               this.$message.error('网络异常');
             }
+            loading.close()
             return false
         }
     }
