@@ -87,7 +87,7 @@ export default {
 }
 .cancel {
   position: fixed;
-  top: 17px;
+  top: 20px;
   left: 100px;
 }
 </style>
