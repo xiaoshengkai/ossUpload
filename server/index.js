@@ -43,13 +43,23 @@ async function start () {
       // 查看拥有 bucket信息
       // let result = await client.listBuckets();
       // console.log(result)
-
       try {
-        let result = await client.put(etx.request.files.file.name, etx.request.files.file.path);
+        let size = etx.request.files.file.size / 1024 / 1024;
+        let result
+        // 如果文件大于5M,采用分分片上传
+        if (size > 5) {
+          result = await client.multipartUpload(
+            etx.request.files.file.name,
+            etx.request.files.file.path, {
+            parallel: parseInt(size / 10)
+          })
+        } else {
+          result = await client.put(etx.request.files.file.name, etx.request.files.file.path);
+        }
         etx.body = {
           type: 1,
-          name: result.name,
-          url: result.url
+          name: result.res.name,
+          url: result.res.requestUrls[0]
         }
       } catch (e) {
         etx.body = {

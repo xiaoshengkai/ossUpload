@@ -7,9 +7,10 @@
             :before-upload="beforeUpload"
             :show-file-list="false"
             auto-upload
+            drag
             multiple>
             <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-            <el-button style="margin-left: 10px;" size="small" type="success" @click="fileList = []">清空</el-button>
+            <el-button class="cancel" style="margin-left: 10px;" size="small" type="success" @click="fileList = []">清空</el-button>
         </el-upload>
         <div class="showImgs" v-if="fileList.length">
             <div v-for="(url, index) in fileList" :key="index" class="box">
@@ -52,9 +53,8 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 .upload {
-    margin: 20px;
 
     .box {
         display: flex;
@@ -74,5 +74,20 @@ export default {
     margin: 20px 0;
     background-color: #f2f2f2;
     padding: 20px;
+    position: fixed;
+    width: 100vw;
+    top: 50px;
+}
+.el-upload-dragger {
+  padding: 20px;
+  border: none;
+  width: 100vw;
+  height: 100vh;
+  text-align: left;
+}
+.cancel {
+  position: fixed;
+  top: 17px;
+  left: 100px;
 }
 </style>
