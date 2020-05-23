@@ -12,7 +12,7 @@
             <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
             <el-button class="cancel" style="margin-left: 10px;" size="small" type="success" @click="fileList = []">清空</el-button>
         </el-upload>
-        <div class="showImgs" v-if="fileList.length">
+        <div class="showImgs" v-if="fileList.length" v-viewer="{movable: false}">
             <div v-for="(url, index) in fileList" :key="index" class="box">
                 <img :src="url" alt="">
                 <p>{{ url }}</p>
@@ -32,6 +32,7 @@ export default {
     },
     methods: {
         async beforeUpload (file) {
+            console.log(file)
             const loading = this.$loading({
               lock: true,
               text: 'Loading',
@@ -48,7 +49,21 @@ export default {
             }
             loading.close()
             return false
+        },
+        // 获取剪切板图片上传
+        getScreenshotData () {
+          document.addEventListener('paste', (event) => {
+              event.preventDefault()
+              const f = event.clipboardData.items[0]
+              if (f) {
+                const file = f.getAsFile()
+                this.beforeUpload(file)
+              }
+          })
         }
+    },
+    mounted () {
+      this.getScreenshotData()
     }
 }
 </script>
@@ -74,20 +89,17 @@ export default {
     margin: 20px 0;
     background-color: #f2f2f2;
     padding: 20px;
-    position: fixed;
     width: 100vw;
-    top: 50px;
 }
 .el-upload-dragger {
   padding: 20px;
-  border: none;
+  margin: 20px;
   width: 100vw;
-  height: 100vh;
   text-align: left;
 }
 .cancel {
-  position: fixed;
-  top: 20px;
-  left: 100px;
+  position: absolute;
+  top: 41px;
+  left: 120px;
 }
 </style>
