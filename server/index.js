@@ -3,6 +3,7 @@ const route = require('koa-route')
 const koaBody = require('koa-body');
 const consola = require('consola')
 const { Nuxt, Builder } = require('nuxt')
+const fs = require('fs')
 
 const app = new Koa()
 
@@ -46,13 +47,10 @@ async function start () {
       try {
         let size = etx.request.files.file.size / 1024 / 1024;
         let result
-        // 如果文件大于5M,采用分分片上传
+        // 如果文件大于5M,采用流式上传
         if (size > 5) {
-          result = await client.multipartUpload(
-            etx.request.files.file.name,
-            etx.request.files.file.path, {
-            parallel: parseInt(size / 10)
-          })
+          let stream = fs.createReadStream(etx.request.files.file.path);
+          result = await client.putStream(etx.request.files.file.name, stream);
         } else {
           result = await client.put(etx.request.files.file.name, etx.request.files.file.path);
         }
@@ -62,6 +60,7 @@ async function start () {
           url: result.res.requestUrls[0]
         }
       } catch (e) {
+        console.log(e)
         etx.body = {
           type: 0
         }
