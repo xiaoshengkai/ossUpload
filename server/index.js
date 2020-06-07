@@ -1,11 +1,14 @@
 const Koa = require('koa')
 const route = require('koa-route')
 const koaBody = require('koa-body');
+const WebSocket = require('faye-websocket')
 const consola = require('consola')
 const { Nuxt, Builder } = require('nuxt')
 const fs = require('fs')
+const url = require('url');
 
 const app = new Koa()
+const server = require('http').createServer(app.callback());
 
 app.use(koaBody({
   multipart: true
@@ -14,6 +17,24 @@ app.use(koaBody({
 // Import and Set Nuxt.js options
 const config = require('../nuxt.config.js')
 config.dev = app.env !== 'production'
+
+// 客户端ws请求进入upgrade事件监听
+// 注册WebSocket 实例
+let clients = []
+server.on('upgrade', (request, socket, head) => {
+  const ws = new WebSocket(request, socket, head)
+  ws.ws_id = url.parse(request.url).query
+  ws.onopen = function() {
+    ws.send('WS：connected');
+  }
+  ws.onclose = function() {
+    // 过滤掉当前关闭ws实例
+    clients = clients.filter(function (x) {
+      return x !== ws;
+    });
+  }
+  clients.push(ws)
+})
 
 async function start () {
   // Instantiate nuxt.js
@@ -45,15 +66,24 @@ async function start () {
       // let result = await client.listBuckets();
       // console.log(result)
       try {
-        let size = etx.request.files.file.size / 1024 / 1024;
-        let result
-        // 如果文件大于5M,采用流式上传
-        if (size > 5) {
-          let stream = fs.createReadStream(etx.request.files.file.path);
-          result = await client.putStream(etx.request.files.file.name, stream);
-        } else {
-          result = await client.put(etx.request.files.file.name, etx.request.files.file.path);
-        }
+        let size = etx.request.files.file.size;
+        let pos = 0
+        // 采用流式上传
+        let stream = fs.createReadStream(etx.request.files.file.path);
+        let searchParams = new URL(`http://${host}:${port}${etx.request.url}`).searchParams
+        let ws = clients.find(ws => ws.ws_id === searchParams.get('ws_id'))
+        // 监听片段，配合webscoket实现进度条
+        stream.on('data', (chunk) => {
+          pos += chunk.length
+          ws.send(JSON.stringify({
+            file_id: searchParams.get('file_id'),
+            progress: pos / size * 100
+          }))
+        })
+        stream.on('end', () => {
+          console.log('WS:下载完毕')
+        })
+        let result = await client.putStream(etx.request.files.file.name, stream);
         etx.body = {
           type: 1,
           name: result.res.name,
@@ -74,7 +104,7 @@ async function start () {
     nuxt.render(ctx.req, ctx.res)
   })
 
-  app.listen(port, host)
+  server.listen(port, host)
   consola.ready({
     message: `Server listening on http://${host}:${port}`,
     badge: true

@@ -11,6 +11,15 @@ const util = {
             baseURL: '/',
             headers: {
                 'Content-Type': 'multipart/form-data'
+            },
+            // 监听 onUploadProgress 事件
+            onUploadProgress: e => {
+                const {loaded, total} = e;
+                // 使用本地 progress 事件
+                if (e.lengthComputable) {
+                    let progress = loaded / total * 100;
+                    console.log(progress)
+                }
             }
           });
           const formData = new FormData()
