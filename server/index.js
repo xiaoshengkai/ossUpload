@@ -26,6 +26,7 @@ server.on('upgrade', (request, socket, head) => {
   ws.ws_id = url.parse(request.url).query
   ws.onopen = function() {
     ws.send('WS：connected');
+    clients.push(ws)
   }
   ws.onclose = function() {
     // 过滤掉当前关闭ws实例
@@ -33,7 +34,6 @@ server.on('upgrade', (request, socket, head) => {
       return x !== ws;
     });
   }
-  clients.push(ws)
 })
 
 async function start () {
