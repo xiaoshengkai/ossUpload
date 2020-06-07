@@ -5,7 +5,7 @@ const WebSocket = require('faye-websocket')
 const consola = require('consola')
 const { Nuxt, Builder } = require('nuxt')
 const fs = require('fs')
-const url = require('url');
+const URL = require('url');
 
 const app = new Koa()
 const server = require('http').createServer(app.callback());
