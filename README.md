@@ -11,8 +11,11 @@
 3.图片预览
 
 ### 如何使用
-拉取模板
 
-### 配置文件 upload-config.js 如下
+#### github-xsk-cli 拉取模板
+
+
+
+#### 配置文件好upload-config.js 如下
 
 
