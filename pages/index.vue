@@ -74,8 +74,10 @@ export default {
               event.preventDefault()
               const f = event.clipboardData.items[0]
               if (f) {
-                const file = f.getAsFile()
-                this.beforeUpload(file)
+                let file = f.getAsFile()
+                // 文件重命名
+                let fileReset = new File([file], new Date().valueOf() + '/' + file.name, {type: file.type})
+                this.beforeUpload(fileReset)
               }
           })
         },
