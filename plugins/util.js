@@ -6,21 +6,21 @@ import Viewer from 'v-viewer'
 const util = {
     install(Vue) {
         // 图片上传请求
-        Vue.prototype.$requestFormPsot = async (url, file) => {
+        Vue.prototype.$requestFormPsot = async (url, file, fnPG) => {
           let instance = axios.create({
             baseURL: '/',
             headers: {
                 'Content-Type': 'multipart/form-data'
             },
             // 监听 onUploadProgress 事件
-            // onUploadProgress: e => {
-            //     const {loaded, total} = e;
-            //     // 使用本地 progress 事件
-            //     if (e.lengthComputable) {
-            //         let progress = loaded / total * 100;
-            //         console.log(progress)
-            //     }
-            // }
+            onUploadProgress: e => {
+                const {loaded, total} = e;
+                // 使用本地 progress 事件
+                if (e.lengthComputable) {
+                    let progress = loaded / total * 100;
+                    fnPG(progress)
+                }
+            }
           });
           const formData = new FormData()
           formData.set('file', file)

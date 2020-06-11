@@ -19,7 +19,7 @@
                   <p>{{ item.url }}</p>
                 </div>
                 <el-progress
-                  :show-text="false"
+                  :show-text="true"
                   :stroke-width="10"
                   :percentage="item.progress"></el-progress>
             </div>
@@ -39,12 +39,6 @@ export default {
     },
     methods: {
         async beforeUpload (file) {
-            // const loading = this.$loading({
-            //   lock: true,
-            //   text: 'Loading',
-            //   spinner: 'el-icon-loading',
-            //   background: 'rgba(0, 0, 0, 0.7)'
-            // });
             try {
               let file_id = `file_id${new Date().valueOf()}` // 为每个文件打上id，让ws知道是哪个文件
               this.fileList.push({
@@ -52,7 +46,21 @@ export default {
                 progress: 0,
                 url: ''
               })
-              const { data } = await this.$requestFormPsot(`/upload?ws_id=${this.ws_id}&file_id=${file_id}`, file)
+              const { data } = await this.$requestFormPsot(
+                `/upload?ws_id=${this.ws_id}&file_id=${file_id}`,
+                file,
+                (progress) => {
+                    if (!progress || progress === 100 ) {
+                      return
+                    }
+                    this.fileList.forEach(item => {
+                      if (item.file_id === file_id) {
+                        item.progress = Number(progress * 0.3)
+                      }
+                    })
+                }
+              )
+              // 结果处理
               if (data.type) {
                 this.fileList.forEach(item => {
                   if (item.file_id === file_id) {
@@ -65,7 +73,6 @@ export default {
               this.fileList.pop()
               this.$message.error('网络异常');
             }
-            // loading.close()
             return false
         },
         // 获取剪切板图片上传
@@ -81,17 +88,18 @@ export default {
               }
           })
         },
-        // 注入 webscoket,实现进度条
+        // 注入 webscoket,实现下载进度条
         registerWS () {
           if (WebSocket) {
             const address = 'ws://' + window.location.host + window.location.pathname + `?${this.ws_id}`;
             const socket = new WebSocket(address);
             socket.onmessage = (msg) => {
               try {
+                // 下载进度占70%
                 let json = JSON.parse((msg.data))
                 this.fileList.forEach(item => {
                   if (item.file_id === json.file_id) {
-                    item.progress = Number(json.progress)
+                    item.progress = Number(json.progress) * 0.7 + 30
                   }
                 })
               } catch (e) {
