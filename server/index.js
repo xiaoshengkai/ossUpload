@@ -14,6 +14,9 @@ app.use(koaBody({
   multipart: true
 }))
 
+// main: oss config
+const ossConfig = require('../oss.config.js')
+
 // Import and Set Nuxt.js options
 const config = require('../nuxt.config.js')
 config.dev = app.env !== 'production'
@@ -50,17 +53,12 @@ async function start () {
   } else {
     await nuxt.ready()
   }
-
+  console.log(ossConfig)
   app.use(route.post('/upload', async (etx) => {
 
       const oss = require('ali-oss');
 
-      const client = oss({
-        accessKeyId: 'LTAIBathEzzg276g',
-        accessKeySecret: '4oQrHuURu2RCHTuKw51FSvX1GHywBZ',
-        bucket: 'mpv-blog',
-        region: 'oss-cn-beijing'
-      });
+      const client = oss(ossConfig);
 
       // 查看拥有 bucket信息
       // let result = await client.listBuckets();
@@ -75,10 +73,12 @@ async function start () {
         // 监听片段，配合webscoket实现进度条
         stream.on('data', (chunk) => {
           pos += chunk.length
-          ws.send(JSON.stringify({
-            file_id: searchParams.get('file_id'),
-            progress: pos / size * 100
-          }))
+          if (ws) {
+            ws.send(JSON.stringify({
+              file_id: searchParams.get('file_id'),
+              progress: pos / size * 100
+            }))
+          }
         })
         stream.on('end', () => {
           console.log('WS:下载完毕')

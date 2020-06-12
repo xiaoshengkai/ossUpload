@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon server/index.js --watch server",
     "build": "nuxt build",
-    "start": "git pull && cnpm i && nuxt build && cross-env NODE_ENV=production && pm2 start --name upload server/index.js",
+    "start": "nuxt build && cross-env NODE_ENV=production && pm2 start --name upload server/index.js",
     "generate": "nuxt generate"
   },
   "dependencies": {
