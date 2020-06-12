@@ -53,7 +53,6 @@ async function start () {
   } else {
     await nuxt.ready()
   }
-  console.log(ossConfig)
   app.use(route.post('/upload', async (etx) => {
 
       const oss = require('ali-oss');
