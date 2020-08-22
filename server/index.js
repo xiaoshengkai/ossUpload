@@ -7,15 +7,14 @@ const { Nuxt, Builder } = require('nuxt')
 const fs = require('fs')
 const url = require('url');
 
+const buckets = require('./buckets')
+
 const app = new Koa()
 const server = require('http').createServer(app.callback());
 
 app.use(koaBody({
   multipart: true
 }))
-
-// main: oss config
-const ossConfig = require('../oss.config.js')
 
 // Import and Set Nuxt.js options
 const config = require('../nuxt.config.js')
@@ -53,11 +52,25 @@ async function start () {
   } else {
     await nuxt.ready()
   }
+
+  // 获取 buckets
+  app.use(route.post('/getBuckets', buckets.getBuckets))
+  // 创建 buckets
+  app.use(route.post('/createBucket', buckets.createBucket))
+  // 删除 buckets
+  app.use(route.post('/delBucket', buckets.delBucket))
+
+  // 上传
   app.use(route.post('/upload', async (etx) => {
 
+      // main: oss config
+      const ossConfig = require('../oss.config.js')
       const oss = require('ali-oss');
 
-      const client = oss(ossConfig);
+      const client = new oss({
+        ...ossConfig,
+        bucket: 'mpv-blog'
+      });
 
       // 查看拥有 bucket信息
       // let result = await client.listBuckets();
